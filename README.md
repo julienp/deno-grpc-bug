@@ -91,3 +91,45 @@ On the deno side we see a broken pipe:
 D 2024-04-05T16:19:11.877Z | v1.10.6 18901 | transport | (1) 127.0.0.1:8888 connection closed with error connection error received: unspecific protocol error detected (b"received an illegal stream id: 1. maxStreamID=1, headers frame: [FrameHeader HEADERS flags=END_STREAM|END_HEADERS stream=1 len=0]")
 error: Uncaught (in promise) Error: stream closed because of a broken pipe
 ```
+
+## node <-> go
+
+When running the node version of our client, we get the following output from the go server:
+
+````
+2024/04/05 21:40:56 http2: Framer 0x140002d2000: wrote SETTINGS len=0
+2024/04/05 21:40:56 http2: Framer 0x140002d2000: read SETTINGS len=0
+2024/04/05 21:40:56 http2: Framer 0x140002d2000: read HEADERS flags=END_HEADERS stream=1 len=127
+2024/04/05 21:40:56 http2: Framer 0x140002d2000: wrote SETTINGS flags=ACK len=0
+2024/04/05 21:40:56 http2: decoded hpack field header field ":authority" = "localhost:8888"
+2024/04/05 21:40:56 http2: decoded hpack field header field ":method" = "POST"
+2024/04/05 21:40:56 http2: decoded hpack field header field ":path" = "/pulumirpc.ResourceMonitor/SupportsFeature"
+2024/04/05 21:40:56 http2: decoded hpack field header field ":scheme" = "http"
+2024/04/05 21:40:56 http2: decoded hpack field header field "grpc-accept-encoding" = "identity,deflate,gzip"
+2024/04/05 21:40:56 http2: decoded hpack field header field "accept-encoding" = "identity"
+2024/04/05 21:40:56 http2: decoded hpack field header field "user-agent" = "grpc-node-js/1.10.6"
+2024/04/05 21:40:56 http2: decoded hpack field header field "content-type" = "application/grpc"
+2024/04/05 21:40:56 http2: decoded hpack field header field "te" = "trailers"
+2024/04/05 21:40:56 http2: Framer 0x140002d2000: read DATA stream=1 len=14 data="\x00\x00\x00\x00\t\n\asecrets"
+2024/04/05 21:40:56 http2: Framer 0x140002d2000: read SETTINGS flags=ACK len=0
+2024/04/05 21:40:56 http2: Framer 0x140002d2000: wrote WINDOW_UPDATE len=4 (conn) incr=14
+2024/04/05 21:40:56 http2: Framer 0x140002d2000: read DATA flags=END_STREAM stream=1 len=0 data=""
+2024/04/05 21:40:56 http2: Framer 0x140002d2000: wrote PING len=8 ping="\x02\x04\x10\x10\t\x0e\a\a"
+2024/04/05 21:40:56 http2: Framer 0x140002d2000: wrote HEADERS flags=END_HEADERS stream=1 len=14
+2024/04/05 21:40:56 http2: Framer 0x140002d2000: wrote DATA stream=1 len=7 data="\x00\x00\x00\x00\x02\b\x01"
+2024/04/05 21:40:56 http2: Framer 0x140002d2000: wrote HEADERS flags=END_STREAM|END_HEADERS stream=1 len=24
+2024/04/05 21:40:56 http2: Framer 0x140002d2000: read PING flags=ACK len=8 ping="\x02\x04\x10\x10\t\x0e\a\a"
+```
+
+Of note is that it looks like node is sending an empty data frame with the end_stream flag
+
+```
+2024/04/05 21:40:56 http2: Framer 0x140002d2000: read DATA flags=END_STREAM stream=1 len=0 data=""
+```
+
+compared to deno instead sending empty trailers, which is the frame that seems to upset the go server.
+
+```
+2024/04/05 18:22:13 http2: Framer 0x1400023a000: read HEADERS flags=END_STREAM|END_HEADERS stream=1 len=0
+```
+````
