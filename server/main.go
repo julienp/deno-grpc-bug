@@ -37,7 +37,6 @@ type resmon struct {
 func (rm *resmon) SupportsFeature(ctx context.Context,
 	req *pulumirpc.SupportsFeatureRequest,
 ) (*pulumirpc.SupportsFeatureResponse, error) {
-	fmt.Printf("SupportsFeature handler: %v\n", req)
 	return &pulumirpc.SupportsFeatureResponse{
 		HasSupport: true,
 	}, nil
