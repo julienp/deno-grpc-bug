@@ -96,7 +96,7 @@ error: Uncaught (in promise) Error: stream closed because of a broken pipe
 
 When running the node version of our client, we get the following output from the go server:
 
-````
+```
 2024/04/05 21:40:56 http2: Framer 0x140002d2000: wrote SETTINGS len=0
 2024/04/05 21:40:56 http2: Framer 0x140002d2000: read SETTINGS len=0
 2024/04/05 21:40:56 http2: Framer 0x140002d2000: read HEADERS flags=END_HEADERS stream=1 len=127
@@ -132,4 +132,3 @@ compared to deno instead sending empty trailers, which is the frame that seems t
 ```
 2024/04/05 18:22:13 http2: Framer 0x1400023a000: read HEADERS flags=END_STREAM|END_HEADERS stream=1 len=0
 ```
-````
